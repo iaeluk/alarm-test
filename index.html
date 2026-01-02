@@ -3,147 +3,173 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Alarme Android Final</title>
+    <title>Alarme Android - Chrome Intents</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
-        body { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: #000; color: white; }
-        .btn-grad { background-image: linear-gradient(to right, #314755 0%, #26a0da 51%, #314755 100%); transition: 0.5s; background-size: 200% auto; }
-        .btn-grad:hover { background-position: right center; }
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #000000;
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        /* Input de Tempo Nativo com Estilo */
+        .time-wrapper {
+            position: relative;
+            background: #1f1f1f;
+            border-radius: 16px;
+            padding: 10px;
+            border: 1px solid #333;
+        }
+
+        input[type="time"] {
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 4rem;
+            font-weight: bold;
+            font-family: monospace;
+            outline: none;
+            width: 100%;
+            text-align: center;
+        }
+
+        /* Ícone do relógio invertido para tema escuro */
+        input[type="time"]::-webkit-calendar-picker-indicator {
+            filter: invert(1);
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+            box-shadow: 0 4px 14px 0 rgba(99, 102, 241, 0.39);
+        }
+        
+        .btn-primary:active {
+            transform: scale(0.98);
+        }
+
+        .debug-box {
+            font-family: 'Courier New', monospace;
+            word-break: break-all;
+        }
     </style>
 </head>
-<body class="h-screen flex flex-col items-center justify-center p-6 text-center">
+<body class="space-y-8">
 
-    <!-- Tela Principal -->
-    <div id="mainScreen" class="w-full max-w-sm flex flex-col items-center gap-8">
-        <div>
-            <h1 class="text-3xl font-bold text-blue-500 mb-2">Alarme Vocal</h1>
-            <p class="text-gray-400">Toque e diga o horário</p>
+    <div class="text-center space-y-2">
+        <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-900 border border-gray-800 mb-4">
+            <i class="fas fa-clock text-3xl text-indigo-500"></i>
         </div>
-
-        <div class="relative">
-            <button id="micBtn" onclick="toggleMic()" class="w-32 h-32 rounded-full bg-gray-800 border-4 border-gray-700 flex items-center justify-center active:scale-95 transition-all shadow-[0_0_30px_rgba(59,130,246,0.2)]">
-                <i id="micIcon" class="fas fa-microphone text-4xl text-blue-500"></i>
-            </button>
-            <div id="ripple" class="absolute inset-0 rounded-full border-2 border-blue-500 opacity-0 pointer-events-none"></div>
-        </div>
-
-        <p id="status" class="h-6 text-blue-300 font-medium">Toque para iniciar</p>
+        <h1 class="text-2xl font-bold">Definir Alarme</h1>
+        <p class="text-gray-400 text-sm">Use o seletor nativo do Android</p>
     </div>
 
-    <!-- Tela de Confirmação (Link Real) -->
-    <div id="confirmScreen" class="hidden w-full max-w-sm bg-gray-900 border border-gray-800 p-8 rounded-3xl shadow-2xl">
-        <h2 class="text-gray-400 text-sm uppercase tracking-wider mb-4">Confirmar Horário</h2>
-        
-        <div class="text-6xl font-bold text-white mb-8 font-mono tracking-tighter" id="timeDisplay">
-            00:00
+    <!-- Seletor de Hora -->
+    <div class="w-full max-w-xs">
+        <div class="time-wrapper mb-6">
+            <input type="time" id="timePicker" required>
         </div>
 
-        <!-- O SEGREDO ESTÁ AQUI: Um link <a> real, não apenas Javascript -->
-        <a id="realLink" href="#" class="btn-grad w-full py-4 rounded-xl text-white font-bold text-lg shadow-lg block mb-4">
-            ABRIR RELÓGIO
+        <!-- Botão Principal (Método Padrão) -->
+        <a id="intentLink" href="#" class="btn-primary w-full block py-4 rounded-xl text-center font-bold text-lg text-white transition-all mb-4 flex items-center justify-center gap-2">
+            <i class="fas fa-check-circle"></i> DEFINIR AGORA
         </a>
 
-        <button onclick="resetApp()" class="text-gray-500 text-sm hover:text-white underline">
-            Cancelar / Tentar de novo
-        </button>
+        <!-- Opções Avançadas (Caso falhe) -->
+        <details class="w-full mt-6 bg-gray-900 rounded-xl border border-gray-800 overflow-hidden">
+            <summary class="p-4 cursor-pointer text-sm text-gray-400 font-medium hover:text-white flex justify-between items-center">
+                Não funcionou? Tente isso
+                <i class="fas fa-chevron-down text-xs"></i>
+            </summary>
+            <div class="p-4 space-y-3 border-t border-gray-800 bg-black/20">
+                <p class="text-xs text-gray-500 mb-2">Alguns fabricantes (Samsung, Xiaomi) bloqueiam a Intent padrão. Tente forçar o app específico:</p>
+                
+                <button onclick="forcePackage('com.google.android.deskclock')" class="w-full py-3 bg-gray-800 hover:bg-gray-700 rounded-lg text-sm text-white font-medium flex items-center justify-center gap-2 transition-colors">
+                    <i class="fab fa-google"></i> Relógio do Google
+                </button>
+                
+                <button onclick="forcePackage('com.sec.android.app.clockpackage')" class="w-full py-3 bg-gray-800 hover:bg-gray-700 rounded-lg text-sm text-white font-medium flex items-center justify-center gap-2 transition-colors">
+                    <i class="fas fa-mobile-alt"></i> Relógio Samsung
+                </button>
+            </div>
+        </details>
+    </div>
+
+    <!-- Debug (URL Gerada) -->
+    <div class="w-full max-w-xs mt-8">
+        <p class="text-xs text-gray-600 mb-1 ml-1">URL da Intent gerada:</p>
+        <div id="debugUrl" class="debug-box text-[10px] text-gray-500 bg-gray-900 p-2 rounded border border-gray-800 h-16 overflow-y-auto">
+            Selecione um horário...
+        </div>
     </div>
 
     <script>
-        // Elementos
-        const micBtn = document.getElementById('micBtn');
-        const status = document.getElementById('status');
-        const mainScreen = document.getElementById('mainScreen');
-        const confirmScreen = document.getElementById('confirmScreen');
-        const timeDisplay = document.getElementById('timeDisplay');
-        const realLink = document.getElementById('realLink');
-        const ripple = document.getElementById('ripple');
+        const timePicker = document.getElementById('timePicker');
+        const intentLink = document.getElementById('intentLink');
+        const debugUrl = document.getElementById('debugUrl');
 
-        let recognition = null;
+        // Inicializar com hora atual
+        const now = new Date();
+        timePicker.value = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+        updateIntent();
 
-        // Configurar Reconhecimento
-        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            recognition = new SpeechRecognition();
-            recognition.lang = 'pt-BR';
-            recognition.continuous = false;
+        // Atualizar link quando mudar a hora
+        timePicker.addEventListener('input', updateIntent);
+
+        function updateIntent() {
+            const [h, m] = timePicker.value.split(':');
+            const hour = parseInt(h);
+            const minute = parseInt(m);
+
+            // --- CONSTRUÇÃO DA INTENT OFICIAL DO CHROME ---
+            // Documentação: https://developer.chrome.com/docs/android/intents
+            // Estrutura: intent:#Intent;action=...;type=...;i.extra=...;S.extra=...;end
             
-            recognition.onstart = () => {
-                status.innerText = "Ouvindo...";
-                micBtn.classList.replace('border-gray-700', 'border-red-500');
-                document.getElementById('micIcon').classList.replace('text-blue-500', 'text-red-500');
-                ripple.classList.add('animate-ping', 'opacity-75');
-            };
+            // Usamos action SET_ALARM
+            let intent = `intent:#Intent;action=android.intent.action.SET_ALARM;`;
+            
+            // Extras (Parâmetros)
+            // i. = Integer
+            // S. = String
+            // B. = Boolean
+            intent += `i.android.intent.extra.alarm.HOUR=${hour};`;
+            intent += `i.android.intent.extra.alarm.MINUTES=${minute};`;
+            intent += `S.android.intent.extra.alarm.MESSAGE=Alarme%20Web;`;
+            intent += `B.android.intent.extra.alarm.SKIP_UI=false;`; // Importante: FALSE para garantir que abra
+            
+            // Fallback (Obrigatório para boas práticas no Chrome)
+            // Se falhar, redireciona para o Google (ou poderia ser a Play Store do Relógio)
+            const fallbackUrl = encodeURIComponent("https://play.google.com/store/apps/details?id=com.google.android.deskclock");
+            intent += `S.browser_fallback_url=${fallbackUrl};`;
+            
+            intent += `end`;
 
-            recognition.onend = () => {
-                micBtn.classList.replace('border-red-500', 'border-gray-700');
-                document.getElementById('micIcon').classList.replace('text-red-500', 'text-blue-500');
-                ripple.classList.remove('animate-ping', 'opacity-75');
-                if (mainScreen.style.display !== 'none') status.innerText = "Toque para falar";
-            };
-
-            recognition.onresult = (e) => processVoice(e.results[0][0].transcript);
-        } else {
-            status.innerText = "Navegador sem suporte a voz.";
+            // Atualiza o href do botão
+            intentLink.href = intent;
+            
+            // Mostra no debug
+            debugUrl.innerText = intent;
         }
 
-        function toggleMic() {
-            if (recognition) recognition.start();
-        }
-
-        function processVoice(text) {
-            console.log("Falou: " + text);
-            text = text.toLowerCase().replace(':', ' ');
+        // Função para tentar forçar pacotes específicos (Samsung/Google)
+        function forcePackage(packageName) {
+            const [h, m] = timePicker.value.split(':');
             
-            let h = null, m = 0;
+            // Adiciona o parâmetro 'package=' na string da Intent
+            let intent = `intent:#Intent;package=${packageName};action=android.intent.action.SET_ALARM;`;
+            intent += `i.android.intent.extra.alarm.HOUR=${parseInt(h)};`;
+            intent += `i.android.intent.extra.alarm.MINUTES=${parseInt(m)};`;
+            intent += `S.android.intent.extra.alarm.MESSAGE=Alarme%20Web;`;
+            intent += `end`;
 
-            // Lógica de Parsing
-            if (text.includes('meio dia')) h = 12;
-            else if (text.includes('meia noite')) h = 0;
-            
-            const nums = text.match(/\d+/g);
-            if (nums) {
-                h = parseInt(nums[0]);
-                if (nums[1]) m = parseInt(nums[1]);
-            } else {
-                // Fallback básico extenso
-                const map = {'uma':1,'um':1,'duas':2,'dois':2,'três':3,'quatro':4,'cinco':5,'seis':6,'sete':7,'oito':8,'nove':9,'dez':10,'onze':11,'doze':12,'vinte':20};
-                for(let w of text.split(' ')) if(map[w]) { h = map[w]; break; }
-                if(text.includes('meia') && h!==null) m = 30;
-            }
-
-            if (h !== null && h >= 0 && h <= 24) {
-                showConfirm(h, m);
-            } else {
-                status.innerText = "Não entendi. Tente '07:30' ou 'Oito horas'.";
-            }
-        }
-
-        function showConfirm(h, m) {
-            // Formatar visual
-            timeDisplay.innerText = `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}`;
-            
-            // Construir o link Intent EXATO
-            // Action: android.intent.action.SET_ALARM
-            // Extras: HOUR (int), MINUTES (int), MESSAGE (string)
-            // IMPORTANTE: Sem SKIP_UI para forçar abertura
-            
-            const intent = `intent:#Intent;action=android.intent.action.SET_ALARM;i.android.intent.extra.alarm.HOUR=${h};i.android.intent.extra.alarm.MINUTES=${m};S.android.intent.extra.alarm.MESSAGE=Alarme%20Web;end`;
-            
-            // Definir o href do botão
-            realLink.href = intent;
-
-            // Trocar telas
-            mainScreen.classList.add('hidden');
-            confirmScreen.classList.remove('hidden');
-            confirmScreen.classList.add('flex', 'flex-col', 'items-center');
-        }
-
-        function resetApp() {
-            confirmScreen.classList.add('hidden');
-            confirmScreen.classList.remove('flex');
-            mainScreen.classList.remove('hidden');
-            status.innerText = "Toque para falar";
+            window.location.href = intent;
         }
     </script>
 </body>
