@@ -38,4 +38,15 @@
     <!-- Permissions -->
 
     <uses-permission android:name="android.permission.INTERNET" />
+
+    <queries>
+    <intent>
+        <action android:name="android.intent.action.SET_ALARM" />
+    </intent>
+    <intent>
+        <action android:name="android.intent.action.SHOW_ALARMS" />
+    </intent>
+    <package android:name="com.sec.android.app.clockpackage" />
+    <package android:name="com.google.android.deskclock" />
+</queries>
 </manifest>
