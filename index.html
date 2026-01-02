@@ -7,115 +7,44 @@
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;700&family=Shrikhand&display=swap" rel="stylesheet">
     
     <style>
-        /* SEU CSS ORIGINAL (Mantido idêntico) */
-        :root {
-            --flamingo-pink: #FF9EB5;
-            --pool-blue: #4ECDC4;
-            --lemon-yellow: #FFEEAD;
-            --deep-teal: #1A535C;
-            --white: #FFFFFF;
-            --accent-orange: #FF6B6B;
-            --hard-shadow: 3px 3px 0px var(--deep-teal);
-        }
+        /* CSS MANTIDO IDÊNTICO */
+        :root { --flamingo-pink: #FF9EB5; --pool-blue: #4ECDC4; --lemon-yellow: #FFEEAD; --deep-teal: #1A535C; --white: #FFFFFF; --accent-orange: #FF6B6B; --hard-shadow: 3px 3px 0px var(--deep-teal); }
         html { touch-action: manipulation; height: 100%; overflow: hidden; }
-        body {
-            margin: 0; padding: 0; height: 100%; width: 100%; position: fixed;
-            display: flex; align-items: center; justify-content: center;
-            background: linear-gradient(135deg, var(--flamingo-pink) 0%, #FFD166 100%);
-            font-family: 'Quicksand', sans-serif; color: var(--deep-teal);
-            overscroll-behavior: none;
-        }
-        body::before {
-            content: ''; position: absolute; width: 100%; height: 100%;
-            background-image: radial-gradient(rgba(255,255,255,0.3) 20%, transparent 20%);
-            background-size: 20px 20px; pointer-events: none;
-        }
-        .card {
-            background: var(--white); width: 85%; max-width: 280px; padding: 20px 15px;
-            border-radius: 30px; border: 3px solid var(--deep-teal);
-            box-shadow: 6px 6px 0px rgba(26, 83, 92, 0.2); text-align: center;
-            position: relative; z-index: 10;
-        }
-        .animation-container {
-            width: 80px; height: 80px; background: var(--pool-blue); border-radius: 50%;
-            margin: -50px auto 10px auto; border: 3px solid var(--deep-teal);
-            box-shadow: var(--hard-shadow); position: relative; overflow: hidden;
-            display: flex; align-items: center; justify-content: center;
-        }
-        .sun {
-            width: 35px; height: 35px; background: var(--lemon-yellow); border-radius: 50%;
-            border: 2px solid var(--deep-teal); position: relative;
-            animation: spin 10s linear infinite;
-        }
-        .sun::before, .sun::after {
-            content: ''; position: absolute; top: 50%; left: 50%; width: 140%; height: 2px;
-            background: var(--deep-teal); transform: translate(-50%, -50%); border-radius: 2px;
-        }
+        body { margin: 0; padding: 0; height: 100%; width: 100%; position: fixed; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, var(--flamingo-pink) 0%, #FFD166 100%); font-family: 'Quicksand', sans-serif; color: var(--deep-teal); overscroll-behavior: none; }
+        body::before { content: ''; position: absolute; width: 100%; height: 100%; background-image: radial-gradient(rgba(255,255,255,0.3) 20%, transparent 20%); background-size: 20px 20px; pointer-events: none; }
+        .card { background: var(--white); width: 85%; max-width: 280px; padding: 20px 15px; border-radius: 30px; border: 3px solid var(--deep-teal); box-shadow: 6px 6px 0px rgba(26, 83, 92, 0.2); text-align: center; position: relative; z-index: 10; }
+        .animation-container { width: 80px; height: 80px; background: var(--pool-blue); border-radius: 50%; margin: -50px auto 10px auto; border: 3px solid var(--deep-teal); box-shadow: var(--hard-shadow); position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+        .sun { width: 35px; height: 35px; background: var(--lemon-yellow); border-radius: 50%; border: 2px solid var(--deep-teal); position: relative; animation: spin 10s linear infinite; }
+        .sun::before, .sun::after { content: ''; position: absolute; top: 50%; left: 50%; width: 140%; height: 2px; background: var(--deep-teal); transform: translate(-50%, -50%); border-radius: 2px; }
         .sun::after { transform: translate(-50%, -50%) rotate(90deg); }
         .sun-rays-diag { position: absolute; width: 100%; height: 100%; animation: spin reverse 10s linear infinite; }
-        .sun-rays-diag::before, .sun-rays-diag::after {
-            content: ''; position: absolute; top: 50%; left: 50%; width: 140%; height: 2px;
-            background: var(--deep-teal); transform: translate(-50%, -50%) rotate(45deg);
-        }
+        .sun-rays-diag::before, .sun-rays-diag::after { content: ''; position: absolute; top: 50%; left: 50%; width: 140%; height: 2px; background: var(--deep-teal); transform: translate(-50%, -50%) rotate(45deg); }
         .sun-rays-diag::after { transform: translate(-50%, -50%) rotate(135deg); }
         @keyframes spin { 100% { transform: rotate(360deg); } }
-        h1 {
-            font-family: 'Shrikhand', cursive; font-size: 1.8rem; color: var(--accent-orange);
-            text-shadow: 1px 1px 0px var(--deep-teal); margin: 5px 0 2px 0; line-height: 1;
-            transform: rotate(-2deg);
-        }
-        p.subtitle {
-            font-weight: 700; color: var(--deep-teal); text-transform: uppercase;
-            font-size: 0.65rem; letter-spacing: 1px; margin-bottom: 15px;
-            background: var(--lemon-yellow); display: inline-block; padding: 3px 10px;
-            border-radius: 15px; border: 2px solid var(--deep-teal);
-            box-shadow: 1px 1px 0px rgba(0,0,0,0.1);
-        }
+        h1 { font-family: 'Shrikhand', cursive; font-size: 1.8rem; color: var(--accent-orange); text-shadow: 1px 1px 0px var(--deep-teal); margin: 5px 0 2px 0; line-height: 1; transform: rotate(-2deg); }
+        p.subtitle { font-weight: 700; color: var(--deep-teal); text-transform: uppercase; font-size: 0.65rem; letter-spacing: 1px; margin-bottom: 15px; background: var(--lemon-yellow); display: inline-block; padding: 3px 10px; border-radius: 15px; border: 2px solid var(--deep-teal); box-shadow: 1px 1px 0px rgba(0,0,0,0.1); }
         .input-group { margin-bottom: 12px; text-align: left; }
         label { display: block; font-weight: 700; margin-left: 10px; margin-bottom: 2px; font-size: 0.75rem; }
-        input {
-            width: 100%; padding: 8px; border-radius: 40px; border: 2px solid var(--deep-teal);
-            background: #F0FDF4; color: var(--deep-teal); font-family: 'Quicksand', sans-serif;
-            font-weight: 700; font-size: 1.1rem; text-align: center; outline: none;
-            box-shadow: var(--hard-shadow); touch-action: manipulation;
-        }
-        .radio-container {
-            display: flex; background: var(--white); border: 2px solid var(--deep-teal);
-            border-radius: 40px; padding: 3px; box-shadow: var(--hard-shadow); margin-bottom: 8px;
-        }
+        input { width: 100%; padding: 8px; border-radius: 40px; border: 2px solid var(--deep-teal); background: #F0FDF4; color: var(--deep-teal); font-family: 'Quicksand', sans-serif; font-weight: 700; font-size: 1.1rem; text-align: center; outline: none; box-shadow: var(--hard-shadow); touch-action: manipulation; }
+        .radio-container { display: flex; background: var(--white); border: 2px solid var(--deep-teal); border-radius: 40px; padding: 3px; box-shadow: var(--hard-shadow); margin-bottom: 8px; }
         .radio-label { flex: 1; position: relative; cursor: pointer; }
         .radio-label input { position: absolute; opacity: 0; width: 0; height: 0; }
-        .radio-text {
-            display: block; padding: 6px 0; text-align: center; border-radius: 40px;
-            font-weight: 700; font-size: 0.8rem; transition: 0.3s; color: var(--deep-teal);
-            border: 2px solid transparent;
-        }
+        .radio-text { display: block; padding: 6px 0; text-align: center; border-radius: 40px; font-weight: 700; font-size: 0.8rem; transition: 0.3s; color: var(--deep-teal); border: 2px solid transparent; }
         .radio-label input:checked + .radio-text { border: 2px solid var(--deep-teal); }
         .radio-label:first-child input:checked + .radio-text { background: var(--pool-blue); }
         .radio-label:last-child input:checked + .radio-text { background: var(--flamingo-pink); }
         .helper { font-size: 0.65rem; text-align: center; color: #666; margin-top: 3px; }
-        .result-box {
-            margin-top: 15px; background: var(--accent-orange); padding: 10px;
-            border-radius: 20px; border: 3px solid var(--deep-teal); box-shadow: var(--hard-shadow);
-            color: var(--white); position: relative; cursor: pointer;
-            transition: transform 0.1s, box-shadow 0.1s;
-        }
+        .result-box { margin-top: 15px; background: var(--accent-orange); padding: 10px; border-radius: 20px; border: 3px solid var(--deep-teal); box-shadow: var(--hard-shadow); color: var(--white); position: relative; cursor: pointer; transition: transform 0.1s, box-shadow 0.1s; }
         .result-box:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0px var(--deep-teal); }
         .result-box::after { content: '⏰'; position: absolute; top: 6px; right: 8px; font-size: 12px; }
         .result-title { display: block; font-size: 0.65rem; text-transform: uppercase; font-weight: 700; margin-bottom: 0; color: var(--lemon-yellow); }
         .result-value { display: block; font-family: 'Shrikhand', cursive; font-size: 2.2rem; line-height: 1; text-shadow: 2px 2px 0px rgba(0,0,0,0.2); }
-        .btn-reset {
-            margin-top: 15px; background: transparent; border: none; font-family: 'Quicksand', sans-serif;
-            font-weight: 700; color: var(--deep-teal); font-size: 0.75rem; cursor: pointer; text-decoration: underline;
-        }
+        .btn-reset { margin-top: 15px; background: transparent; border: none; font-family: 'Quicksand', sans-serif; font-weight: 700; color: var(--deep-teal); font-size: 0.75rem; cursor: pointer; text-decoration: underline; }
     </style>
 </head>
 <body>
-
     <div class="card">
-        <div class="animation-container">
-            <div class="sun"><div class="sun-rays-diag"></div></div>
-        </div>
+        <div class="animation-container"><div class="sun"><div class="sun-rays-diag"></div></div></div>
         <h1>Clock out</h1>
         <p class="subtitle">Jornada 9H</p>
         <div class="input-group">
@@ -125,14 +54,8 @@
         <div class="input-group">
             <label>Banco</label>
             <div class="radio-container">
-                <label class="radio-label">
-                    <input type="radio" name="balanceType" value="credit" checked>
-                    <span class="radio-text">Sair cedo</span>
-                </label>
-                <label class="radio-label">
-                    <input type="radio" name="balanceType" value="debit">
-                    <span class="radio-text">Sair tarde</span>
-                </label>
+                <label class="radio-label"><input type="radio" name="balanceType" value="credit" checked><span class="radio-text">Sair cedo</span></label>
+                <label class="radio-label"><input type="radio" name="balanceType" value="debit"><span class="radio-text">Sair tarde</span></label>
             </div>
             <div style="margin-top: 8px;">
                 <input type="text" id="balanceTime" placeholder="000" inputmode="numeric" maxlength="5">
@@ -148,7 +71,10 @@
     </div>
 
     <script type="module">
-        import { AppLauncher } from '@capacitor/app-launcher';
+        import { registerPlugin } from '@capacitor/core';
+
+        // --- REGISTRO DO PLUGIN NATIVO QUE CRIAMOS NO JAVA ---
+        const Alarm = registerPlugin('Alarm');
 
         const entryInput = document.getElementById('entryTime');
         const balanceInput = document.getElementById('balanceTime');
@@ -157,6 +83,10 @@
         const btnAlarm = document.getElementById('btnAlarm');
         const btnReset = document.getElementById('btnReset');
         const WORK_MINUTES = 9 * 60; 
+
+        // Bloqueios de interface
+        document.addEventListener('gesturestart', (e) => e.preventDefault());
+        document.addEventListener('touchmove', (e) => { if(e.scale !== 1) e.preventDefault(); }, { passive: false });
 
         // Lógica de cálculo (Mantida)
         function parseTime(val) {
@@ -178,27 +108,18 @@
             const [h, m] = entryVal.split(':').map(Number);
             const entryMin = h * 60 + m;
             const balanceMin = parseTime(balanceInput.value);
-            
             let isCredit = true;
-            for(let radio of radioButtons) {
-                if(radio.checked && radio.value === 'debit') isCredit = false;
-            }
-            let exitMin;
-            if (isCredit) {
-                exitMin = entryMin + WORK_MINUTES - balanceMin;
-            } else {
-                exitMin = entryMin + WORK_MINUTES + balanceMin;
-            }
+            for(let radio of radioButtons) { if(radio.checked && radio.value === 'debit') isCredit = false; }
+            let exitMin = isCredit ? (entryMin + WORK_MINUTES - balanceMin) : (entryMin + WORK_MINUTES + balanceMin);
             if (exitMin >= 1440) exitMin -= 1440;
             if (exitMin < 0) exitMin += 1440;
-
             const finalH = Math.floor(exitMin / 60);
             const finalM = exitMin % 60;
             resultDisplay.textContent = `${String(finalH).padStart(2,'0')}:${String(finalM).padStart(2,'0')}`;
         }
 
-        // --- FUNÇÃO CAPACITOR ATUALIZADA ---
-        async function setAndroidAlarm() {
+        // --- CHAMADA DO PLUGIN NATIVO ---
+        async function setNativeAlarm() {
             const timeText = resultDisplay.textContent;
             if (timeText === "--:--" || !timeText) {
                 alert("Calcule o horário primeiro!");
@@ -207,58 +128,37 @@
 
             const [h, m] = timeText.split(':').map(Number);
 
-            // Tenta verificar se consegue abrir antes
-            // O plugin AppLauncher requer a action completa
-            const alarmUrl = `intent:#Intent;action=android.intent.action.SET_ALARM;i.hour=${h};i.minutes=${m};S.android.intent.extra.MESSAGE=Saida Ponto;B.android.intent.extra.SKIP_UI=false;end`;
-
             try {
-                // Primeiro verifica se o Android deixa (agora com o XML editado, deve deixar)
-                const check = await AppLauncher.canOpenUrl({ url: alarmUrl });
-                
-                if (check.value) {
-                    await AppLauncher.openUrl({ url: alarmUrl });
-                } else {
-                    // Fallback: Tenta abrir mesmo se o check falhar (às vezes o check falha em Samsung mas o open funciona)
-                    await AppLauncher.openUrl({ url: alarmUrl });
-                }
+                // Aqui chamamos o Java! Sem URL, sem Intent maluca.
+                await Alarm.set({ hour: h, minute: m });
             } catch (e) {
-                alert('Erro Técnico: ' + JSON.stringify(e));
-                console.error(e);
+                alert("Erro ao abrir relógio: " + e.message);
             }
         }
 
-        // Event Listeners (JS Moderno)
+        // Listeners
         balanceInput.addEventListener('input', (e) => {
             let v = e.target.value.replace(/\D/g, '');
             if (v.length >= 3) {
                 const mm = v.slice(-2);
                 const hh = v.slice(0, -2);
                 e.target.value = hh + ':' + mm;
-            } else {
-                e.target.value = v;
-            }
+            } else { e.target.value = v; }
             calc();
         });
-        
-        // Adiciona o evento de clique ao botão de alarme
-        btnAlarm.addEventListener('click', setAndroidAlarm);
-        
         entryInput.addEventListener('input', calc);
-        for(let radio of radioButtons) {
-            radio.addEventListener('change', calc);
+        for(let radio of radioButtons) { radio.addEventListener('change', calc); }
+        btnReset.addEventListener('click', () => {
+            entryInput.value = ''; balanceInput.value = ''; radioButtons[0].checked = true;
+            calc(); resultDisplay.textContent = "--:--"; entryInput.focus();
+        });
+
+        // Vincula o botão
+        if(btnAlarm) {
+            btnAlarm.addEventListener('click', setNativeAlarm);
         }
 
-        btnReset.addEventListener('click', () => {
-            entryInput.value = '';
-            balanceInput.value = '';
-            radioButtons[0].checked = true;
-            calc();
-            resultDisplay.textContent = "--:--";
-            entryInput.focus();
-        });
-
-        // Previne zoom
-        document.addEventListener('gesturestart', (e) => e.preventDefault());
+        window.onload = () => { entryInput.focus(); };
     </script>
 </body>
 </html>
