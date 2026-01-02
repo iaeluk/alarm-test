@@ -1,178 +1,184 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-PT">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Alarme Android - Chrome Intents</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Ponto Retro Mini</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;700&family=Shrikhand&display=swap" rel="stylesheet">
+
     <style>
+        :root {
+            --flamingo-pink: #FF9EB5;
+            --pool-blue: #4ECDC4;
+            --lemon-yellow: #FFEEAD;
+            --deep-teal: #1A535C;
+            --white: #FFFFFF;
+            --accent-orange: #FF6B6B;
+            --hard-shadow: 3px 3px 0px var(--deep-teal);
+        }
+
+        html {
+            touch-action: manipulation;
+            height: 100%;
+            overflow: hidden;
+        }
+
         body {
-            font-family: 'Roboto', sans-serif;
-            background-color: #000000;
-            color: #ffffff;
+            margin: 0;
+            height: 100%;
+            width: 100%;
+            position: fixed;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
-            min-height: 100vh;
-            padding: 20px;
+            background: linear-gradient(135deg, var(--flamingo-pink) 0%, #FFD166 100%);
+            font-family: 'Quicksand', sans-serif;
+            color: var(--deep-teal);
+            overscroll-behavior: none;
         }
 
-        /* Input de Tempo Nativo com Estilo */
-        .time-wrapper {
-            position: relative;
-            background: #1f1f1f;
-            border-radius: 16px;
-            padding: 10px;
-            border: 1px solid #333;
-        }
-
-        input[type="time"] {
-            background: transparent;
-            border: none;
-            color: white;
-            font-size: 4rem;
-            font-weight: bold;
-            font-family: monospace;
-            outline: none;
+        body::before {
+            content: '';
+            position: absolute;
             width: 100%;
-            text-align: center;
+            height: 100%;
+            background-image: radial-gradient(rgba(255,255,255,0.3) 20%, transparent 20%);
+            background-size: 20px 20px;
+            pointer-events: none;
         }
 
-        /* Ícone do relógio invertido para tema escuro */
-        input[type="time"]::-webkit-calendar-picker-indicator {
-            filter: invert(1);
+        .card {
+            background: var(--white);
+            width: 85%;
+            max-width: 280px;
+            padding: 20px 15px;
+            border-radius: 30px;
+            border: 3px solid var(--deep-teal);
+            box-shadow: 6px 6px 0px rgba(26, 83, 92, 0.2);
+            text-align: center;
+            position: relative;
+            z-index: 10;
+        }
+
+        .animation-container {
+            width: 80px;
+            height: 80px;
+            background: var(--pool-blue);
+            border-radius: 50%;
+            margin: -50px auto 10px auto;
+            border: 3px solid var(--deep-teal);
+            box-shadow: var(--hard-shadow);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .sun {
+            width: 35px;
+            height: 35px;
+            background: var(--lemon-yellow);
+            border-radius: 50%;
+            border: 2px solid var(--deep-teal);
+            animation: spin 10s linear infinite;
+            position: relative;
+        }
+
+        .sun::before, .sun::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 140%;
+            height: 2px;
+            background: var(--deep-teal);
+            transform: translate(-50%, -50%);
+        }
+
+        .sun::after {
+            transform: translate(-50%, -50%) rotate(90deg);
+        }
+
+        @keyframes spin {
+            100% { transform: rotate(360deg); }
+        }
+
+        h1 {
+            font-family: 'Shrikhand', cursive;
+            font-size: 1.8rem;
+            color: var(--accent-orange);
+            margin: 5px 0;
+        }
+
+        .result-box {
+            margin-top: 15px;
+            background: var(--accent-orange);
+            padding: 10px;
+            border-radius: 20px;
+            border: 3px solid var(--deep-teal);
+            box-shadow: var(--hard-shadow);
+            color: var(--white);
             cursor: pointer;
         }
 
-        .btn-primary {
-            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
-            box-shadow: 0 4px 14px 0 rgba(99, 102, 241, 0.39);
-        }
-        
-        .btn-primary:active {
-            transform: scale(0.98);
+        .result-title {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            font-weight: 700;
         }
 
-        .debug-box {
-            font-family: 'Courier New', monospace;
-            word-break: break-all;
+        .result-value {
+            font-family: 'Shrikhand', cursive;
+            font-size: 2.2rem;
         }
     </style>
 </head>
-<body class="space-y-8">
+<body>
 
-    <div class="text-center space-y-2">
-        <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-900 border border-gray-800 mb-4">
-            <i class="fas fa-clock text-3xl text-indigo-500"></i>
-        </div>
-        <h1 class="text-2xl font-bold">Definir Alarme</h1>
-        <p class="text-gray-400 text-sm">Use o seletor nativo do Android</p>
+<div class="card">
+    <h1>Clock out</h1>
+
+    <input type="time" id="entryTime">
+    <input type="text" id="balanceTime" placeholder="000">
+
+    <div class="result-box" onclick="setAndroidAlarm()">
+        <span class="result-title">Saída Prevista</span>
+        <span class="result-value" id="result">--:--</span>
     </div>
+</div>
 
-    <!-- Seletor de Hora -->
-    <div class="w-full max-w-xs">
-        <div class="time-wrapper mb-6">
-            <input type="time" id="timePicker" required>
-        </div>
+<script>
+    const entryInput = document.getElementById('entryTime');
+    const balanceInput = document.getElementById('balanceTime');
+    const resultDisplay = document.getElementById('result');
 
-        <!-- Botão Principal (Método Padrão) -->
-        <a id="intentLink" href="#" class="btn-primary w-full block py-4 rounded-xl text-center font-bold text-lg text-white transition-all mb-4 flex items-center justify-center gap-2">
-            <i class="fas fa-check-circle"></i> DEFINIR AGORA
-        </a>
+    function calc() {
+        if (!entryInput.value) return;
+        const [h, m] = entryInput.value.split(':').map(Number);
+        resultDisplay.textContent =
+            `${String(h + 9).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+    }
 
-        <!-- Opções Avançadas (Caso falhe) -->
-        <details class="w-full mt-6 bg-gray-900 rounded-xl border border-gray-800 overflow-hidden">
-            <summary class="p-4 cursor-pointer text-sm text-gray-400 font-medium hover:text-white flex justify-between items-center">
-                Não funcionou? Tente isso
-                <i class="fas fa-chevron-down text-xs"></i>
-            </summary>
-            <div class="p-4 space-y-3 border-t border-gray-800 bg-black/20">
-                <p class="text-xs text-gray-500 mb-2">Alguns fabricantes (Samsung, Xiaomi) bloqueiam a Intent padrão. Tente forçar o app específico:</p>
-                
-                <button onclick="forcePackage('com.google.android.deskclock')" class="w-full py-3 bg-gray-800 hover:bg-gray-700 rounded-lg text-sm text-white font-medium flex items-center justify-center gap-2 transition-colors">
-                    <i class="fab fa-google"></i> Relógio do Google
-                </button>
-                
-                <button onclick="forcePackage('com.sec.android.app.clockpackage')" class="w-full py-3 bg-gray-800 hover:bg-gray-700 rounded-lg text-sm text-white font-medium flex items-center justify-center gap-2 transition-colors">
-                    <i class="fas fa-mobile-alt"></i> Relógio Samsung
-                </button>
-            </div>
-        </details>
-    </div>
+    entryInput.addEventListener('input', calc);
 
-    <!-- Debug (URL Gerada) -->
-    <div class="w-full max-w-xs mt-8">
-        <p class="text-xs text-gray-600 mb-1 ml-1">URL da Intent gerada:</p>
-        <div id="debugUrl" class="debug-box text-[10px] text-gray-500 bg-gray-900 p-2 rounded border border-gray-800 h-16 overflow-y-auto">
-            Selecione um horário...
-        </div>
-    </div>
+    /* === FUNÇÃO SUBSTITUÍDA AQUI === */
+    function setAndroidAlarm() {
+        const timeText = resultDisplay.textContent;
+        if (timeText === "--:--") return;
 
-    <script>
-        const timePicker = document.getElementById('timePicker');
-        const intentLink = document.getElementById('intentLink');
-        const debugUrl = document.getElementById('debugUrl');
+        const [h, m] = timeText.split(':').map(Number);
 
-        // Inicializar com hora atual
-        const now = new Date();
-        timePicker.value = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
-        updateIntent();
+        const intentUrl =
+            `intent://alarm#Intent;` +
+            `action=android.intent.action.SET_ALARM;` +
+            `i.extra.HOUR=${h};` +
+            `i.extra.MINUTES=${m};` +
+            `S.extra.MESSAGE=Saída do trabalho;` +
+            `end`;
 
-        // Atualizar link quando mudar a hora
-        timePicker.addEventListener('input', updateIntent);
+        window.location.href = intentUrl;
+    }
+</script>
 
-        function updateIntent() {
-            const [h, m] = timePicker.value.split(':');
-            const hour = parseInt(h);
-            const minute = parseInt(m);
-
-            // --- CONSTRUÇÃO DA INTENT OFICIAL DO CHROME ---
-            // Documentação: https://developer.chrome.com/docs/android/intents
-            // Estrutura: intent:#Intent;action=...;type=...;i.extra=...;S.extra=...;end
-            
-            // Usamos action SET_ALARM
-            let intent = `intent:#Intent;action=android.intent.action.SET_ALARM;`;
-            
-            // Extras (Parâmetros)
-            // i. = Integer
-            // S. = String
-            // B. = Boolean
-            intent += `i.android.intent.extra.alarm.HOUR=${hour};`;
-            intent += `i.android.intent.extra.alarm.MINUTES=${minute};`;
-            intent += `S.android.intent.extra.alarm.MESSAGE=Alarme%20Web;`;
-            intent += `B.android.intent.extra.alarm.SKIP_UI=false;`; // Importante: FALSE para garantir que abra
-            
-            // Fallback (Obrigatório para boas práticas no Chrome)
-            // Se falhar, redireciona para o Google (ou poderia ser a Play Store do Relógio)
-            const fallbackUrl = encodeURIComponent("https://play.google.com/store/apps/details?id=com.google.android.deskclock");
-            intent += `S.browser_fallback_url=${fallbackUrl};`;
-            
-            intent += `end`;
-
-            // Atualiza o href do botão
-            intentLink.href = intent;
-            
-            // Mostra no debug
-            debugUrl.innerText = intent;
-        }
-
-        // Função para tentar forçar pacotes específicos (Samsung/Google)
-        function forcePackage(packageName) {
-            const [h, m] = timePicker.value.split(':');
-            
-            // Adiciona o parâmetro 'package=' na string da Intent
-            let intent = `intent:#Intent;package=${packageName};action=android.intent.action.SET_ALARM;`;
-            intent += `i.android.intent.extra.alarm.HOUR=${parseInt(h)};`;
-            intent += `i.android.intent.extra.alarm.MINUTES=${parseInt(m)};`;
-            intent += `S.android.intent.extra.alarm.MESSAGE=Alarme%20Web;`;
-            intent += `end`;
-
-            window.location.href = intent;
-        }
-    </script>
 </body>
 </html>
-
-
