@@ -197,20 +197,33 @@
             resultDisplay.textContent = `${String(finalH).padStart(2,'0')}:${String(finalM).padStart(2,'0')}`;
         }
 
-        // --- FUNÇÃO CAPACITOR QUE VAI NO APK ---
+        // --- FUNÇÃO CAPACITOR ATUALIZADA ---
         async function setAndroidAlarm() {
             const timeText = resultDisplay.textContent;
-            if (timeText === "--:--" || !timeText) return;
+            if (timeText === "--:--" || !timeText) {
+                alert("Calcule o horário primeiro!");
+                return;
+            }
 
             const [h, m] = timeText.split(':').map(Number);
 
-            // Código nativo para Capacitor
+            // Tenta verificar se consegue abrir antes
+            // O plugin AppLauncher requer a action completa
             const alarmUrl = `intent:#Intent;action=android.intent.action.SET_ALARM;i.hour=${h};i.minutes=${m};S.android.intent.extra.MESSAGE=Saida Ponto;B.android.intent.extra.SKIP_UI=false;end`;
 
             try {
-                await AppLauncher.openUrl({ url: alarmUrl });
+                // Primeiro verifica se o Android deixa (agora com o XML editado, deve deixar)
+                const check = await AppLauncher.canOpenUrl({ url: alarmUrl });
+                
+                if (check.value) {
+                    await AppLauncher.openUrl({ url: alarmUrl });
+                } else {
+                    // Fallback: Tenta abrir mesmo se o check falhar (às vezes o check falha em Samsung mas o open funciona)
+                    await AppLauncher.openUrl({ url: alarmUrl });
+                }
             } catch (e) {
-                alert('Erro ao abrir alarme: ' + JSON.stringify(e));
+                alert('Erro Técnico: ' + JSON.stringify(e));
+                console.error(e);
             }
         }
 
