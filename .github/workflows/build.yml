@@ -1,10 +1,16 @@
-name: Build Android APK
+name: Build Android APK & Release
 
 on:
   push:
     branches:
-      - main
+      - main      # Roda build de teste em todo push na main
+    tags:
+      - 'v*'      # Roda build + RELEASE apenas quando a tag começa com 'v' (ex: v1.0, v2.3)
   workflow_dispatch: # Permite rodar manualmente se precisar
+
+# Permissão necessária para o robô criar a Release
+permissions:
+  contents: write
 
 jobs:
   build:
@@ -24,7 +30,6 @@ jobs:
         run: |
           npm ci
           npm run build
-          # O build do Vite cria a pasta 'dist'
 
       - name: Sincronizar Capacitor
         run: |
@@ -40,8 +45,24 @@ jobs:
         working-directory: ./android
         run: ./gradlew assembleDebug
 
-      - name: Upload do APK
+      # Mantive o upload de Artifact caso queira baixar sem criar release
+      - name: Upload do APK (Artifact Temporário)
         uses: actions/upload-artifact@v4
         with:
           name: ponto-retro-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
+          retention-days: 5
+
+      # --- NOVO: CRIA A RELEASE OFICIAL ---
+      - name: Publicar Release no GitHub
+        # Essa linha garante que só cria a release se for uma TAG
+        if: startsWith(github.ref, 'refs/tags/') 
+        uses: softprops/action-gh-release@v1
+        with:
+          files: android/app/build/outputs/apk/debug/app-debug.apk
+          name: Versão ${{ github.ref_name }}
+          body: "Nova versão gerada automaticamente via GitHub Actions."
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
