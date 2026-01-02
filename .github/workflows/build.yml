@@ -1,0 +1,47 @@
+name: Build Android APK
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch: # Permite rodar manualmente se precisar
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      - name: Instalar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Instalar Dependências e Construir Site
+        run: |
+          npm ci
+          npm run build
+          # O build do Vite cria a pasta 'dist'
+
+      - name: Sincronizar Capacitor
+        run: |
+          npx cap sync android
+
+      - name: Configurar Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Compilar APK (Debug)
+        working-directory: ./android
+        run: ./gradlew assembleDebug
+
+      - name: Upload do APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: ponto-retro-apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
