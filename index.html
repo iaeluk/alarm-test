@@ -3,223 +3,147 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Alarme por Voz - Android</title>
+    <title>Alarme Android Final</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap');
-        
-        body {
-            font-family: 'Roboto', sans-serif;
-            background-color: #121212;
-            color: #e0e0e0;
-        }
-
-        .mic-btn {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        
-        .mic-btn.listening {
-            background-color: #ef4444; /* Red */
-            transform: scale(1.1);
-            box-shadow: 0 0 30px rgba(239, 68, 68, 0.5);
-        }
-
-        .action-card {
-            animation: slideUp 0.3s ease-out forwards;
-        }
-
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        body { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: #000; color: white; }
+        .btn-grad { background-image: linear-gradient(to right, #314755 0%, #26a0da 51%, #314755 100%); transition: 0.5s; background-size: 200% auto; }
+        .btn-grad:hover { background-position: right center; }
     </style>
 </head>
-<body class="h-screen w-full flex flex-col items-center justify-between py-10 px-4">
+<body class="h-screen flex flex-col items-center justify-center p-6 text-center">
 
-    <!-- Header -->
-    <div class="text-center mt-4">
-        <h1 class="text-2xl font-bold text-blue-400 tracking-wide">ALARME DE VOZ</h1>
-        <p class="text-gray-500 text-sm mt-1">Diga "Sete horas" ou "Oito e trinta"</p>
-    </div>
+    <!-- Tela Principal -->
+    <div id="mainScreen" class="w-full max-w-sm flex flex-col items-center gap-8">
+        <div>
+            <h1 class="text-3xl font-bold text-blue-500 mb-2">Alarme Vocal</h1>
+            <p class="text-gray-400">Toque e diga o horário</p>
+        </div>
 
-    <!-- Main Display -->
-    <div class="flex-1 flex flex-col items-center justify-center w-full max-w-sm">
-        
-        <!-- Estado Inicial / Microfone -->
-        <div id="micContainer" class="flex flex-col items-center gap-6">
-            <button id="micBtn" onclick="toggleListening()" class="mic-btn w-24 h-24 rounded-full bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-900/50">
-                <i id="micIcon" class="fas fa-microphone text-3xl text-white"></i>
+        <div class="relative">
+            <button id="micBtn" onclick="toggleMic()" class="w-32 h-32 rounded-full bg-gray-800 border-4 border-gray-700 flex items-center justify-center active:scale-95 transition-all shadow-[0_0_30px_rgba(59,130,246,0.2)]">
+                <i id="micIcon" class="fas fa-microphone text-4xl text-blue-500"></i>
             </button>
-            <p id="statusText" class="text-lg text-gray-400 font-light">Toque para falar</p>
+            <div id="ripple" class="absolute inset-0 rounded-full border-2 border-blue-500 opacity-0 pointer-events-none"></div>
         </div>
 
-        <!-- Área de Confirmação (Escondida inicialmente) -->
-        <div id="confirmCard" class="hidden action-card w-full bg-gray-800 rounded-2xl p-6 shadow-xl border border-gray-700 text-center">
-            <p class="text-gray-400 text-sm mb-2">Definir alarme para:</p>
-            <div class="text-5xl font-bold text-white mb-6 font-mono" id="timeDisplay">00:00</div>
-            
-            <div class="flex gap-3">
-                <button onclick="cancelAlarm()" class="flex-1 py-3 rounded-xl bg-gray-700 hover:bg-gray-600 text-gray-300 font-medium transition-colors">
-                    Cancelar
-                </button>
-                <button onclick="confirmAlarm()" class="flex-1 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold shadow-lg shadow-blue-900/30 transition-colors flex items-center justify-center gap-2">
-                    <i class="fas fa-check"></i> Definir
-                </button>
-            </div>
-            <div class="mt-4 text-xs text-gray-500">
-                Isso abrirá o app de Relógio
-            </div>
-        </div>
-
+        <p id="status" class="h-6 text-blue-300 font-medium">Toque para iniciar</p>
     </div>
 
-    <!-- Debug/Transcrição -->
-    <div class="text-center h-10">
-        <p id="transcript" class="text-gray-600 text-xs italic"></p>
+    <!-- Tela de Confirmação (Link Real) -->
+    <div id="confirmScreen" class="hidden w-full max-w-sm bg-gray-900 border border-gray-800 p-8 rounded-3xl shadow-2xl">
+        <h2 class="text-gray-400 text-sm uppercase tracking-wider mb-4">Confirmar Horário</h2>
+        
+        <div class="text-6xl font-bold text-white mb-8 font-mono tracking-tighter" id="timeDisplay">
+            00:00
+        </div>
+
+        <!-- O SEGREDO ESTÁ AQUI: Um link <a> real, não apenas Javascript -->
+        <a id="realLink" href="#" class="btn-grad w-full py-4 rounded-xl text-white font-bold text-lg shadow-lg block mb-4">
+            ABRIR RELÓGIO
+        </a>
+
+        <button onclick="resetApp()" class="text-gray-500 text-sm hover:text-white underline">
+            Cancelar / Tentar de novo
+        </button>
     </div>
 
     <script>
+        // Elementos
         const micBtn = document.getElementById('micBtn');
-        const micContainer = document.getElementById('micContainer');
-        const statusText = document.getElementById('statusText');
-        const transcriptEl = document.getElementById('transcript');
-        const confirmCard = document.getElementById('confirmCard');
+        const status = document.getElementById('status');
+        const mainScreen = document.getElementById('mainScreen');
+        const confirmScreen = document.getElementById('confirmScreen');
         const timeDisplay = document.getElementById('timeDisplay');
-        
-        let recognition = null;
-        let selectedHour = 0;
-        let selectedMinute = 0;
+        const realLink = document.getElementById('realLink');
+        const ripple = document.getElementById('ripple');
 
-        // Configuração do Web Speech API
+        let recognition = null;
+
+        // Configurar Reconhecimento
         if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             recognition = new SpeechRecognition();
             recognition.lang = 'pt-BR';
             recognition.continuous = false;
-            recognition.interimResults = false;
-
+            
             recognition.onstart = () => {
-                micBtn.classList.add('listening');
-                statusText.innerText = "Estou ouvindo...";
-                statusText.classList.add('text-red-400');
-                transcriptEl.innerText = "";
+                status.innerText = "Ouvindo...";
+                micBtn.classList.replace('border-gray-700', 'border-red-500');
+                document.getElementById('micIcon').classList.replace('text-blue-500', 'text-red-500');
+                ripple.classList.add('animate-ping', 'opacity-75');
             };
 
             recognition.onend = () => {
-                micBtn.classList.remove('listening');
-                if (confirmCard.classList.contains('hidden')) {
-                    statusText.innerText = "Toque para falar";
-                    statusText.classList.remove('text-red-400');
-                }
+                micBtn.classList.replace('border-red-500', 'border-gray-700');
+                document.getElementById('micIcon').classList.replace('text-red-500', 'text-blue-500');
+                ripple.classList.remove('animate-ping', 'opacity-75');
+                if (mainScreen.style.display !== 'none') status.innerText = "Toque para falar";
             };
 
-            recognition.onresult = (event) => {
-                const text = event.results[0][0].transcript;
-                transcriptEl.innerText = `"${text}"`;
-                parseTime(text);
-            };
-            
-            recognition.onerror = (e) => {
-                statusText.innerText = "Erro. Tente novamente.";
-            };
+            recognition.onresult = (e) => processVoice(e.results[0][0].transcript);
         } else {
-            statusText.innerText = "Navegador não suportado.";
-            micBtn.disabled = true;
-            micBtn.classList.add('opacity-50');
+            status.innerText = "Navegador sem suporte a voz.";
         }
 
-        function toggleListening() {
-            if (!recognition) return;
-            try {
-                recognition.start();
-            } catch (e) {
-                recognition.stop();
-            }
+        function toggleMic() {
+            if (recognition) recognition.start();
         }
 
-        function parseTime(text) {
-            text = text.toLowerCase()
-                .replace(' e ', ' ')
-                .replace(':', ' '); // Facilita parsing de "14:30"
-
+        function processVoice(text) {
+            console.log("Falou: " + text);
+            text = text.toLowerCase().replace(':', ' ');
+            
             let h = null, m = 0;
 
-            // Tratamentos específicos
-            if (text.includes('meio dia') || text.includes('meio-dia')) h = 12;
-            else if (text.includes('meia noite') || text.includes('meia-noite')) h = 0;
+            // Lógica de Parsing
+            if (text.includes('meio dia')) h = 12;
+            else if (text.includes('meia noite')) h = 0;
             
-            // Extração numérica simples
-            const numbers = text.match(/\d+/g);
-            
-            if (h === null && numbers && numbers.length > 0) {
-                h = parseInt(numbers[0]);
-                if (numbers.length > 1) m = parseInt(numbers[1]);
-            }
-            
-            // Se ainda nulo, tentar extenso básico (comum no reconhecimento)
-            if (h === null) {
-                const map = {'uma':1, 'um':1, 'duas':2, 'dois':2, 'três':3, 'quatro':4, 'cinco':5, 'seis':6, 'sete':7, 'oito':8, 'nove':9, 'dez':10, 'onze':11, 'doze':12, 'vinte':20};
-                for(let word of text.split(' ')) {
-                    if(map[word]) { h = map[word]; break; }
-                }
-                if (text.includes('meia') && h !== null) m = 30;
+            const nums = text.match(/\d+/g);
+            if (nums) {
+                h = parseInt(nums[0]);
+                if (nums[1]) m = parseInt(nums[1]);
+            } else {
+                // Fallback básico extenso
+                const map = {'uma':1,'um':1,'duas':2,'dois':2,'três':3,'quatro':4,'cinco':5,'seis':6,'sete':7,'oito':8,'nove':9,'dez':10,'onze':11,'doze':12,'vinte':20};
+                for(let w of text.split(' ')) if(map[w]) { h = map[w]; break; }
+                if(text.includes('meia') && h!==null) m = 30;
             }
 
-            // Validação
             if (h !== null && h >= 0 && h <= 24) {
-                if (h === 24) h = 0;
-                if (m > 59) m = 0;
-                
-                selectedHour = h;
-                selectedMinute = m;
-                
-                showConfirmation();
+                showConfirm(h, m);
             } else {
-                statusText.innerText = "Horário não entendido.";
-                setTimeout(() => statusText.innerText = "Toque para falar", 2000);
+                status.innerText = "Não entendi. Tente '07:30' ou 'Oito horas'.";
             }
         }
 
-        function showConfirmation() {
-            micContainer.classList.add('hidden');
-            confirmCard.classList.remove('hidden');
+        function showConfirm(h, m) {
+            // Formatar visual
+            timeDisplay.innerText = `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}`;
             
-            // Formatação visual HH:MM
-            const hh = selectedHour.toString().padStart(2, '0');
-            const mm = selectedMinute.toString().padStart(2, '0');
-            timeDisplay.innerText = `${hh}:${mm}`;
+            // Construir o link Intent EXATO
+            // Action: android.intent.action.SET_ALARM
+            // Extras: HOUR (int), MINUTES (int), MESSAGE (string)
+            // IMPORTANTE: Sem SKIP_UI para forçar abertura
+            
+            const intent = `intent:#Intent;action=android.intent.action.SET_ALARM;i.android.intent.extra.alarm.HOUR=${h};i.android.intent.extra.alarm.MINUTES=${m};S.android.intent.extra.alarm.MESSAGE=Alarme%20Web;end`;
+            
+            // Definir o href do botão
+            realLink.href = intent;
+
+            // Trocar telas
+            mainScreen.classList.add('hidden');
+            confirmScreen.classList.remove('hidden');
+            confirmScreen.classList.add('flex', 'flex-col', 'items-center');
         }
 
-        function cancelAlarm() {
-            confirmCard.classList.add('hidden');
-            micContainer.classList.remove('hidden');
-            statusText.innerText = "Toque para falar";
-            statusText.classList.remove('text-red-400');
-            transcriptEl.innerText = "";
-        }
-
-        function confirmAlarm() {
-            // CORREÇÃO CRUCIAL AQUI:
-            // Usando os nomes completos das Extras para garantir compatibilidade
-            // ACTION_SET_ALARM = android.intent.action.SET_ALARM
-            // EXTRA_HOUR = android.intent.extra.alarm.HOUR
-            // EXTRA_MINUTES = android.intent.extra.alarm.MINUTES
-            // EXTRA_MESSAGE = android.intent.extra.alarm.MESSAGE
-            // EXTRA_SKIP_UI = android.intent.extra.alarm.SKIP_UI
-
-            // Nota: 'i' prefixo para integer, 'S' para String, 'B' para Boolean
-            const intentUrl = `intent:#Intent;action=android.intent.action.SET_ALARM;i.android.intent.extra.alarm.HOUR=${selectedHour};i.android.intent.extra.alarm.MINUTES=${selectedMinute};S.android.intent.extra.alarm.MESSAGE=Alarme%20Voz;B.android.intent.extra.alarm.SKIP_UI=true;end`;
-
-            // Verificação simples de User Agent
-            if (/Android/i.test(navigator.userAgent)) {
-                window.location.href = intentUrl;
-            } else {
-                alert("Este recurso funciona apenas no Android.\n\nURL gerada:\n" + intentUrl);
-            }
-            
-            // Reseta UI após um breve tempo para UX
-            setTimeout(cancelAlarm, 1000);
+        function resetApp() {
+            confirmScreen.classList.add('hidden');
+            confirmScreen.classList.remove('flex');
+            mainScreen.classList.remove('hidden');
+            status.innerText = "Toque para falar";
         }
     </script>
 </body>
