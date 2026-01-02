@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alarme por Voz Android</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a; /* Slate 900 */
+        }
+
+        .pulse-ring {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+            background-color: rgba(99, 102, 241, 0.4); /* Indigo */
+            opacity: 0;
+            z-index: -1;
+        }
+
+        @keyframes pulse-ring {
+            0% { transform: scale(0.8); opacity: 0.6; }
+            100% { transform: scale(2.2); opacity: 0; }
+        }
+
+        .mic-active {
+            background-color: #ef4444 !important; /* Red-500 */
+            box-shadow: 0 0 20px rgba(239, 68, 68, 0.6);
+        }
+    </style>
+</head>
+<body class="h-screen w-full flex flex-col items-center justify-center text-white overflow-hidden p-4">
+
+    <!-- Conteúdo Principal -->
+    <div class="max-w-md w-full flex flex-col items-center text-center space-y-8">
+        
+        <!-- Cabeçalho -->
+        <div>
+            <h1 class="text-3xl font-bold mb-2 bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent">
+                Alarme Rápido
+            </h1>
+            <p class="text-gray-400 text-sm">Toque, fale o horário e pronto.</p>
+        </div>
+
+        <!-- Área do Botão -->
+        <div class="relative group">
+            <div id="pulse-effect" class="hidden pulse-ring"></div>
+            
+            <button id="micButton" onclick="startListening()" 
+                class="relative z-10 w-32 h-32 rounded-full bg-indigo-600 hover:bg-indigo-500 transition-all duration-300 flex items-center justify-center shadow-lg shadow-indigo-500/30 active:scale-95">
+                <i id="micIcon" class="fas fa-microphone text-4xl text-white"></i>
+            </button>
+        </div>
+
+        <!-- Status e Resultado -->
+        <div class="h-24 flex flex-col items-center justify-center w-full">
+            <p id="statusText" class="text-lg font-medium text-gray-300">Toque para falar</p>
+            <p id="transcriptText" class="text-sm text-gray-500 mt-2 italic h-5"></p>
+        </div>
+
+        <!-- Feedback de Erro ou Sucesso (Hidden by default) -->
+        <div id="feedbackArea" class="hidden w-full bg-gray-800 p-4 rounded-xl border border-gray-700">
+            <div class="flex items-center justify-between">
+                <span class="text-indigo-300 font-mono text-xl" id="detectedTime">--:--</span>
+                <button onclick="setAlarmManual()" id="manualBtn" class="bg-indigo-600 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-indigo-500">
+                    Confirmar
+                </button>
+            </div>
+            <p class="text-xs text-gray-500 mt-2 text-left">Detectamos este horário. Se o alarme não abrir, clique em Confirmar.</p>
+        </div>
+
+    </div>
+
+    <!-- Script de Lógica -->
+    <script>
+        // Variáveis Globais
+        const micButton = document.getElementById('micButton');
+        const micIcon = document.getElementById('micIcon');
+        const pulseEffect = document.getElementById('pulse-effect');
+        const statusText = document.getElementById('statusText');
+        const transcriptText = document.getElementById('transcriptText');
+        const feedbackArea = document.getElementById('feedbackArea');
+        const detectedTimeDisplay = document.getElementById('detectedTime');
+        
+        let recognition = null;
+        let lastHour = 0;
+        let lastMinute = 0;
+
+        // Inicializar Reconhecimento de Fala (Web Speech API)
+        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRecognition();
+            recognition.lang = 'pt-BR';
+            recognition.continuous = false;
+            recognition.interimResults = false;
+
+            recognition.onstart = () => {
+                statusText.innerText = "Ouvindo...";
+                statusText.className = "text-lg font-medium text-red-400 animate-pulse";
+                transcriptText.innerText = "";
+                micButton.classList.add('mic-active');
+                pulseEffect.classList.remove('hidden');
+                feedbackArea.classList.add('hidden');
+            };
+
+            recognition.onend = () => {
+                resetUI();
+            };
+
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                transcriptText.innerText = `"${transcript}"`;
+                processTime(transcript);
+            };
+
+            recognition.onerror = (event) => {
+                statusText.innerText = "Erro ao ouvir. Tente novamente.";
+                resetUI();
+            };
+        } else {
+            statusText.innerText = "Seu navegador não suporta voz.";
+            micButton.disabled = true;
+            micButton.classList.add('opacity-50', 'cursor-not-allowed');
+        }
+
+        function startListening() {
+            if (recognition) {
+                try {
+                    recognition.start();
+                } catch (e) {
+                    // Se já estiver rodando, para e reinicia
+                    recognition.stop();
+                }
+            }
+        }
+
+        function resetUI() {
+            micButton.classList.remove('mic-active');
+            pulseEffect.classList.add('hidden');
+            if (statusText.innerText === "Ouvindo...") {
+                statusText.innerText = "Toque para falar";
+                statusText.className = "text-lg font-medium text-gray-300";
+            }
+        }
+
+        // Lógica para extrair horário da frase falada
+        function processTime(text) {
+            text = text.toLowerCase();
+            
+            let hour = null;
+            let minute = 0;
+
+            // Tratamento especial para "Meio dia" e "Meia noite"
+            if (text.includes('meio dia') || text.includes('meio-dia')) {
+                hour = 12;
+            } else if (text.includes('meia noite') || text.includes('meia-noite')) {
+                hour = 0;
+            } else {
+                // Tenta encontrar números na string (ex: "7 e 30", "14 horas", "8")
+                // Regex procura por dígitos
+                const numbers = text.match(/\d+/g);
+
+                if (numbers && numbers.length > 0) {
+                    hour = parseInt(numbers[0]);
+                    
+                    if (numbers.length > 1) {
+                        minute = parseInt(numbers[1]);
+                    }
+                } else {
+                    // Fallback para números por extenso (básico)
+                    const mapNumbers = {
+                        'uma': 1, 'um': 1, 'duas': 2, 'dois': 2, 'três': 3, 'quatro': 4,
+                        'cinco': 5, 'seis': 6, 'sete': 7, 'oito': 8, 'nove': 9, 'dez': 10,
+                        'onze': 11, 'doze': 12, 'treze': 13, 'quatorze': 14, 'quinze': 15,
+                        'dezesseis': 16, 'dezesete': 17, 'dezoito': 18, 'dezenove': 19, 'vinte': 20
+                    };
+                    
+                    // Tenta achar a hora no mapa
+                    const words = text.split(' ');
+                    for (let w of words) {
+                        if (mapNumbers[w] !== undefined && hour === null) {
+                            hour = mapNumbers[w];
+                        } else if (w === 'meia' && hour !== null) {
+                            minute = 30;
+                        }
+                    }
+                }
+            }
+
+            if (hour !== null) {
+                // Validações básicas
+                if (hour > 23) hour = 0; // Prevenção simples
+                if (minute > 59) minute = 0;
+
+                lastHour = hour;
+                lastMinute = minute;
+
+                // Formatar para exibição
+                const displayH = hour.toString().padStart(2, '0');
+                const displayM = minute.toString().padStart(2, '0');
+                
+                detectedTimeDisplay.innerText = `${displayH}:${displayM}`;
+                statusText.innerText = "Horário detectado!";
+                statusText.className = "text-lg font-medium text-green-400";
+                
+                feedbackArea.classList.remove('hidden');
+
+                // Tentar abrir o alarme automaticamente
+                triggerAndroidAlarm(hour, minute);
+            } else {
+                statusText.innerText = "Não entendi o horário.";
+                statusText.className = "text-lg font-medium text-yellow-400";
+            }
+        }
+
+        function triggerAndroidAlarm(h, m) {
+            // Verifica se é Android (userAgent check simples)
+            const isAndroid = /Android/i.test(navigator.userAgent);
+            
+            // Cria a URI do Intent do Android
+            // Esta string mágica diz ao Android para abrir a ação SET_ALARM
+            const intentUri = `intent:#Intent;scheme=android-app;action=android.intent.action.SET_ALARM;i.hour=${h};i.minutes=${m};S.message=Alarme Web;end`;
+
+            if (isAndroid) {
+                // Tenta redirecionar
+                window.location.href = intentUri;
+            } else {
+                console.log("Comando de alarme (só funciona no Android):", intentUri);
+                // Se estiver no Desktop, mostra um aviso visual
+                const originalText = statusText.innerText;
+                statusText.innerText = "Isso abriria o alarme no Android.";
+                setTimeout(() => {
+                   // statusText.innerText = originalText;
+                }, 3000);
+            }
+        }
+
+        function setAlarmManual() {
+            triggerAndroidAlarm(lastHour, lastMinute);
+        }
+    </script>
+</body>
+</html>
+
